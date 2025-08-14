@@ -1,6 +1,6 @@
 WITH yesterday AS (
     SELECT * FROM users_growth_accounting
-    WHERE date = DATE('2023-03-09')
+    WHERE date = DATE('2023-03-01')
 ),
      today AS (
          SELECT
@@ -8,11 +8,10 @@ WITH yesterday AS (
             DATE_TRUNC('day', event_time::timestamp) as today_date,
             COUNT(1)
          FROM events
-         WHERE DATE_TRUNC('day', event_time::timestamp) = DATE('2023-03-10')
+         WHERE DATE_TRUNC('day', event_time::timestamp) = DATE('2023-03-02')
          AND user_id IS NOT NULL
          GROUP BY user_id, DATE_TRUNC('day', event_time::timestamp)
      )
-
          SELECT COALESCE(t.user_id, y.user_id)                    as user_id,
                 COALESCE(y.first_active_date, t.today_date)       AS first_active_date,
                 COALESCE(t.today_date, y.last_active_date)        AS last_active_date,

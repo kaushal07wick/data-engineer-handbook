@@ -5,8 +5,6 @@ CREATE TYPE scd_type AS (
                     start_season INTEGER,
                     end_season INTEGER
                         )
-
-
 WITH last_season_scd AS (
     SELECT * FROM players_scd
     WHERE current_season = 2021
@@ -87,8 +85,6 @@ WITH last_season_scd AS (
          WHERE ls.player_name IS NULL
 
      )
-
-
 SELECT *, 2022 AS current_season FROM (
                   SELECT *
                   FROM historical_scd
@@ -107,4 +103,4 @@ SELECT *, 2022 AS current_season FROM (
 
                   SELECT *
                   FROM new_records
-              ) a
+              )

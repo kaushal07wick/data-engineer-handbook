@@ -27,7 +27,5 @@ WITH streak_started AS (
             MAX(current_season) AS end_date
          FROM streak_identified
          GROUP BY 1,2,3
-     )
-
-     SELECT player_name, scoring_class, start_date, end_date
-     FROM aggregated
+     ) SELECT player_name, scoring_class, start_date, end_date
+FROM aggregated;
