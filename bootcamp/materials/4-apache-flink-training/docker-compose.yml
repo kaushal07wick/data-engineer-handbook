@@ -2,37 +2,33 @@ services:
   jobmanager:
     build: .
     image: eczachly-pyflink
-    pull_policy: never
-    container_name: "jobmanager"
-    hostname: "jobmanager"
-    platform: "linux/amd64"
+    container_name: jobmanager
+    hostname: jobmanager
+    platform: linux/amd64
     env_file:
       - flink-env.env
     expose:
       - "6123"
     ports:
-      - "8081:8081"
+      - "8081:8081"  # Flink Web UI
     volumes:
       - ./:/opt/flink/usrlib
       - ./src/:/opt/src
     command: jobmanager
-    extra_hosts:
-      - "host.docker.internal:host-gateway" #// Access services on the host machine from within the Docker container
+    networks:
+      - shared-net
     environment:
-      - POSTGRES_URL=${POSTGRES_URL:-jdbc:postgresql://host.docker.internal:5432/postgres}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-postgres}
-      - |
-        FLINK_PROPERTIES=
+      POSTGRES_URL: jdbc:postgresql://postgres:5432/${POSTGRES_SCHEMA}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_SCHEMA}
+      FLINK_PROPERTIES: |
         jobmanager.rpc.address: jobmanager
 
-  # Flink task manager
   taskmanager:
     image: eczachly-pyflink
-    pull_policy: never
-    container_name: "taskmanager"
-    platform: "linux/amd64"
+    container_name: taskmanager
+    platform: linux/amd64
     env_file:
       - flink-env.env
     expose:
@@ -44,11 +40,14 @@ services:
     depends_on:
       - jobmanager
     command: taskmanager --taskmanager.registration.timeout 5 min
-    extra_hosts:
-      - "host.docker.internal:host-gateway" #// Access services on the host machine from within the Docker container
+    networks:
+      - shared-net
     environment:
-      - |
-        FLINK_PROPERTIES=
+      FLINK_PROPERTIES: |
         jobmanager.rpc.address: jobmanager
         taskmanager.numberOfTaskSlots: 15
         parallelism.default: 3
+
+networks:
+  shared-net:
+    external: true
